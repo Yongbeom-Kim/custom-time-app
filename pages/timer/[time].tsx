@@ -1,12 +1,11 @@
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import { useEffect, useState } from 'react';
+import { add, Duration, format, formatDuration } from 'date-fns';
 
 export const getStaticPaths: GetStaticPaths = async () => {
 
     return {
-        paths: [
-            { params: { time: "10-minutes" } }
-        ],
+        paths: [],
         fallback: "blocking",
     }
 };
@@ -39,12 +38,17 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
 const TimerPage: NextPage = (props) => {
     console.log("PROPS", props);
-
+    console.log(Date.now());
+    console.log(format(Date.now(), "dd-mm-yyyy hh:mm:ss"))
+    console.log(format(add(Date.now(), props.time), "dd-mm-yyyy hh:mm:ss"))
+    console.log(formatDuration(props.time));
+    
     const [timeLeft, setTimeLeft] = useState(props.time);
+
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setTimeLeft((timeLeft) => {
+            setTimeLeft((timeLeft: { seconds: number; minutes: number; hours: number; }) => {
                 if (timeLeft.seconds > 0) {
                     return { ...timeLeft, ...{ seconds: timeLeft.seconds - 1 } };
                 }
