@@ -1,9 +1,9 @@
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
-import { MutableRefObject, useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { formatDuration } from 'date-fns/fp';
-import { milliseconds } from 'date-fns';
 import { useAudio, useTimer } from '../../libraries/hooks';
-import { seconds, subDuration } from '../../libraries/utils/date-utils';
+import { seconds } from '../../libraries/utils/date-utils';
+import { Timer } from '../../components/timer';
 
 export const getStaticPaths: GetStaticPaths = async () => {
 
@@ -37,23 +37,16 @@ export const getStaticProps: GetStaticProps = async (context) => {
     }
 
     return {
-        props: { timer: timerDuration }
+        props: { timerDuration: timerDuration }
     }
 };
 
 const TimerPage: NextPage = (props) => {
-    // const [timeLeft, setTimeLeft] = useState(props.timer);
     const [alarm, playAlarm] = useAudio("/alarm-sfx/rooster-crowing.wav");
-    const [timeLeft] = useTimer(props.timer);
-
-    useEffect(() => {
-        if (seconds(timeLeft) === 0) {
-            playAlarm();
-        }
-    }, [timeLeft]);
-
+    console.log(props);
     return (<>
-        <h1>Time Left: {formatDuration(timeLeft)} </h1>
+        <h1>Time Left:</h1>
+        <Timer initialDuration={props.timerDuration} onFinish={() => playAlarm()} />
     </>);
 }
 
