@@ -1,6 +1,6 @@
 import { MutableRefObject, useEffect, useRef, useState } from "react";
 
-export function useAudioHook(audio_url: string) {
+export function useAudioHook(audio_url: string): [HTMLAudioElement, () => void, () => void] {
     let audio: MutableRefObject<HTMLAudioElement> = useRef(null);
     const [playing, setPlaying] = useState(false);
 
@@ -23,5 +23,5 @@ export function useAudioHook(audio_url: string) {
         }}, [playing]
     )
 
-    return [audio, () => setPlaying(true), () => setPlaying(false)];
+    return [audio.current, () => setPlaying(true), () => setPlaying(false)];
 }

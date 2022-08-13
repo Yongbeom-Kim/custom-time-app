@@ -1,7 +1,7 @@
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
-import { useEffect, useState } from 'react';
-import { format, formatDuration, subSeconds, addHours } from 'date-fns/fp';
-import { add, milliseconds, secondsInDay } from 'date-fns';
+import { MutableRefObject, useEffect, useRef, useState } from 'react';
+import { formatDuration } from 'date-fns/fp';
+import { milliseconds } from 'date-fns';
 import { useAudioHook } from '../../libraries/hooks';
 import { subDuration } from '../../libraries/utils/date-utils';
 
@@ -41,24 +41,22 @@ export const getStaticProps: GetStaticProps = async (context) => {
 const TimerPage: NextPage = (props) => {
     const [timeLeft, setTimeLeft] = useState(props.timer);
     const [alarm, playAlarm] = useAudioHook("/alarm-sfx/rooster-crowing.wav");
+    let timerInterval: MutableRefObject<NodeJS.Timer> = useRef(null);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            
-            console.log(timeLeft, " | ", milliseconds(timeLeft));
-            if (Math.floor(milliseconds(timeLeft)/1000) === 0) {
-                clearInterval(interval);
-                playAlarm();
-            }
-
+        timerInterval.current = setInterval(() => {
             setTimeLeft((timeLeft: Duration) => subDuration(timeLeft, { seconds: 1 }));
-            // setTimeLeft(subDuration(timeLeft, { seconds: 1 }));
-
-            // });
         }, 1000);
 
-        return () => { clearInterval(interval) }
+        return () => { clearInterval(timerInterval.current) }
     }, [])
+
+    useEffect(() => {
+        if (Math.floor(milliseconds(timeLeft)/1000) === 0) {
+            clearInterval(timerInterval.current);
+            playAlarm();
+        }
+    }, [timeLeft]);
 
     return (<>
         <h1>Time Left: {formatDuration(timeLeft)} </h1>
