@@ -1,6 +1,9 @@
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import { useEffect, useState } from 'react';
-import { add, Duration, format, formatDuration } from 'date-fns';
+import { format, formatDuration, subSeconds, addHours } from 'date-fns/fp';
+import { add, milliseconds, secondsInDay } from 'date-fns';
+import { useAudioHook } from '../../libraries/hooks';
+import { subDuration } from '../../libraries/utils/date-utils';
 
 export const getStaticPaths: GetStaticPaths = async () => {
 
@@ -11,62 +14,55 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps = async (context) => {
-    const time = context.params.time.split("-");
-    const timeProps = { hours: 0, minutes: 0, seconds: 0 };
-    console.log(time);
+    const rawDuration = context.params.time.split("-");
+    const timerDuration: Duration = { hours: 0, minutes: 0, seconds: 0 };
 
-    for (let i = 0; i < time.length; i++) {
-        switch (time[i + 1]) {
+    for (let i = 0; i < rawDuration.length; i++) {
+        switch (rawDuration[i + 1]) {
             case ("hours"):
-                timeProps.hours = parseInt(time[i]);
+                timerDuration.hours = parseInt(rawDuration[i]);
                 break;
 
             case ("minutes"):
-                timeProps.minutes = parseInt(time[i]);
+                timerDuration.minutes = parseInt(rawDuration[i]);
                 break;
 
             case ("seconds"):
-                timeProps.seconds = parseInt(time[i]);
+                timerDuration.seconds = parseInt(rawDuration[i]);
                 break;
         }
     }
 
     return {
-        props: { time: timeProps }
+        props: { timer: timerDuration }
     }
 };
 
 const TimerPage: NextPage = (props) => {
-    console.log("PROPS", props);
-    console.log(Date.now());
-    console.log(format(Date.now(), "dd-mm-yyyy hh:mm:ss"))
-    console.log(format(add(Date.now(), props.time), "dd-mm-yyyy hh:mm:ss"))
-    console.log(formatDuration(props.time));
-    
-    const [timeLeft, setTimeLeft] = useState(props.time);
-
+    const [timeLeft, setTimeLeft] = useState(props.timer);
+    const [alarm, playAlarm] = useAudioHook("/alarm-sfx/rooster-crowing.wav");
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setTimeLeft((timeLeft: { seconds: number; minutes: number; hours: number; }) => {
-                if (timeLeft.seconds > 0) {
-                    return { ...timeLeft, ...{ seconds: timeLeft.seconds - 1 } };
-                }
-                if (timeLeft.minutes > 0) {
-                    return { ...timeLeft, ...{ minutes: timeLeft.minutes - 1, seconds: 59 } };
-                }
-                if (timeLeft.hours > 0) {
-                    return { ...timeLeft, ...{ hours: timeLeft.hours - 1, minutes: 59, seconds: 59 } };
-                }
-                clearInterval(interval)
-                return timeLeft;
-            });
+            
+            console.log(timeLeft, " | ", milliseconds(timeLeft));
+            if (Math.floor(milliseconds(timeLeft)/1000) === 0) {
+                clearInterval(interval);
+                playAlarm();
+            }
+
+            setTimeLeft((timeLeft: Duration) => subDuration(timeLeft, { seconds: 1 }));
+            // setTimeLeft(subDuration(timeLeft, { seconds: 1 }));
+
+            // });
         }, 1000);
 
         return () => { clearInterval(interval) }
     }, [])
 
-    return <h1>Time Left: {JSON.stringify(timeLeft)} </h1>;
+    return (<>
+        <h1>Time Left: {formatDuration(timeLeft)} </h1>
+    </>);
 }
 
 export default TimerPage;
