@@ -2,8 +2,8 @@ import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import { formatDuration } from 'date-fns/fp';
 import { milliseconds } from 'date-fns';
-import { useAudioHook } from '../../libraries/hooks';
-import { subDuration } from '../../libraries/utils/date-utils';
+import { useAudio, useTimer } from '../../libraries/hooks';
+import { seconds, subDuration } from '../../libraries/utils/date-utils';
 
 export const getStaticPaths: GetStaticPaths = async () => {
 
@@ -20,14 +20,17 @@ export const getStaticProps: GetStaticProps = async (context) => {
     for (let i = 0; i < rawDuration.length; i++) {
         switch (rawDuration[i + 1]) {
             case ("hours"):
+            case ("hour"):
                 timerDuration.hours = parseInt(rawDuration[i]);
                 break;
 
             case ("minutes"):
+            case ("minute"):
                 timerDuration.minutes = parseInt(rawDuration[i]);
                 break;
 
             case ("seconds"):
+            case ("second"):
                 timerDuration.seconds = parseInt(rawDuration[i]);
                 break;
         }
@@ -39,21 +42,12 @@ export const getStaticProps: GetStaticProps = async (context) => {
 };
 
 const TimerPage: NextPage = (props) => {
-    const [timeLeft, setTimeLeft] = useState(props.timer);
-    const [alarm, playAlarm] = useAudioHook("/alarm-sfx/rooster-crowing.wav");
-    let timerInterval: MutableRefObject<NodeJS.Timer> = useRef(null);
+    // const [timeLeft, setTimeLeft] = useState(props.timer);
+    const [alarm, playAlarm] = useAudio("/alarm-sfx/rooster-crowing.wav");
+    const [timeLeft] = useTimer(props.timer);
 
     useEffect(() => {
-        timerInterval.current = setInterval(() => {
-            setTimeLeft((timeLeft: Duration) => subDuration(timeLeft, { seconds: 1 }));
-        }, 1000);
-
-        return () => { clearInterval(timerInterval.current) }
-    }, [])
-
-    useEffect(() => {
-        if (Math.floor(milliseconds(timeLeft)/1000) === 0) {
-            clearInterval(timerInterval.current);
+        if (seconds(timeLeft) === 0) {
             playAlarm();
         }
     }, [timeLeft]);
