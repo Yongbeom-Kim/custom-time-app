@@ -4,6 +4,7 @@ import { milliseconds } from 'date-fns';
 import { seconds, subDuration } from './utils/date-utils';
 
 export function useAudio(audio_url: string): [HTMLAudioElement, () => void, () => void] {
+    // @ts-ignore we assign proper variable to this on initialization
     let audio: MutableRefObject<HTMLAudioElement> = useRef(null);
     const [playing, setPlaying] = useState(false);
 
@@ -16,7 +17,7 @@ export function useAudio(audio_url: string): [HTMLAudioElement, () => void, () =
         return () => {
             audio.current.removeEventListener("ended", stopPlaying);
         }
-    }, []);
+    }, [audio_url]);
 
     useEffect(() => {
         if (playing) {
@@ -28,25 +29,4 @@ export function useAudio(audio_url: string): [HTMLAudioElement, () => void, () =
     )
 
     return [audio.current, () => setPlaying(true), () => setPlaying(false)];
-}
-
-export function useTimer(duration: Duration): [Duration, Dispatch<SetStateAction<Duration>>] {
-    const [timeLeft, setTimeLeft] = useState(duration);
-    let timerInterval: MutableRefObject<NodeJS.Timer> = useRef(null);
-
-    useEffect(() => {
-        timerInterval.current = setInterval(() => {
-            setTimeLeft((timeLeft: Duration) => subDuration(timeLeft, { seconds: 1 }));
-        }, 1000);
-
-        return () => { clearInterval(timerInterval.current) }
-    }, [])
-
-    useEffect(() => {
-        if (Math.floor(seconds(timeLeft)) === 0) {
-            clearInterval(timerInterval.current);
-        }
-    }, [timeLeft]);
-
-    return [timeLeft, setTimeLeft];
 }

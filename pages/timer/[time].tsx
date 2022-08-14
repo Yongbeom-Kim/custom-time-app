@@ -1,7 +1,7 @@
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import { useEffect } from 'react';
 import { formatDuration } from 'date-fns/fp';
-import { useAudio, useTimer } from '../../libraries/hooks';
+import { useAudio } from '../../libraries/hooks';
 import { seconds } from '../../libraries/utils/date-utils';
 import { Timer } from '../../components/timer';
 

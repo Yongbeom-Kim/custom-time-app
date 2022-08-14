@@ -1,14 +1,28 @@
-import { useEffect } from "react";
-import { useTimer } from "../libraries/hooks";
-import { seconds } from "../libraries/utils/date-utils";
+import { MutableRefObject, useEffect, useRef, useState } from "react";
+import { seconds, subDuration } from "../libraries/utils/date-utils";
 
 import styles from "./timer.module.css";
 
-export function Timer({ initialDuration, onFinish }) {
-    const [timeLeft] = useTimer(initialDuration);
+export function Timer({ initialDuration, onFinish = () => { } }) {
+    const [timeLeft, setTimeLeft] = useState(initialDuration);
+    const [playing, setPlaying] = useState(true);
+
+    // @ts-ignore initialised on initialisation
+    const timerInterval: MutableRefObject<NodeJS.Timer> = useRef(null);
+
+    useEffect(() => {
+        timerInterval.current = setInterval(() => {
+            if (playing) {
+                setTimeLeft((timeLeft: Duration) => subDuration(timeLeft, { seconds: 1 }));
+            }
+        }, 1000);
+
+        return () => { clearInterval(timerInterval.current) }
+    }, [playing])
 
     useEffect(() => {
         if (seconds(timeLeft) === 0) {
+            clearInterval(timerInterval.current);
             onFinish();
         }
     }, [timeLeft]);
@@ -20,11 +34,18 @@ export function Timer({ initialDuration, onFinish }) {
             </div>
             {/* <hr /> */}
             <div className={styles.timerButtonLayout}>
-                <button className={styles.timerButton}>Pause</button>
-                <button className={styles.timerButton}>Stop</button>
+                {playing && <>
+                    <button className={styles.timerButton} onClick={() => setPlaying(false)}>Pause</button>
+                    <button className={styles.timerButton}>Reset</button>
+                </>
+                }
+                {!playing && <>
+                    <button className={styles.timerButton} onClick={() => setPlaying(true)}>Play</button>
+                    <button className={styles.timerButton}>Reset</button>
+                </>}
             </div>
-        </div>
-    )
+        </div >
+    );
 }
 
 function pad_digit(n: number): string {
