@@ -28,7 +28,7 @@ export function Timer({ initialDuration, onFinish = () => { } }) {
     useEffect(() => {
         if (!playing) {
             // Beautify timer
-            setTimeLeft(Math.round((endTime - Date.now())/1000)*1000);
+            setTimeLeft(Math.round((endTime - Date.now()) / 1000) * 1000);
             return;
         }
         timerInterval.current = setInterval(() => {
@@ -65,7 +65,13 @@ export function Timer({ initialDuration, onFinish = () => { } }) {
     return (
         <div className={styles.timer}>
             <div className={styles.timerText}>
-                {pad_digit(getHours(timeLeft))}:{pad_digit(getMinutes(timeLeft))}:{pad_digit(getSeconds(timeLeft))}
+                <form className={styles.timerForm} action="">
+                    <input className={styles.timerInput} type="text" name="" id="" value={pad_digit(getHours(timeLeft))} readOnly={true} />
+                    :
+                    <input className={styles.timerInput} type="text" name="" id="" value={pad_digit(getMinutes(timeLeft))} readOnly={true} />
+                    :
+                    <input className={styles.timerInput} type="text" name="" id="" value={pad_digit(getSeconds(timeLeft))} readOnly={true} />
+                </form>
             </div>
             {/* <hr /> */}
             <div className={styles.timerButtonLayout}>
@@ -84,6 +90,7 @@ export function Timer({ initialDuration, onFinish = () => { } }) {
 }
 
 function pad_digit(n: number): string {
+    if (n <= 0) return "00";
     if (n < 10) {
         return `0${n}`;
     }

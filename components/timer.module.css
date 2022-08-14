@@ -16,11 +16,22 @@
     /* Dynamic font size - this is kinda just a magic value for now */
     font-size: clamp(1.5vw, 0.5vw + 0.5rem, 2vw);
 
+    /* Unselectable Text */
+    -webkit-user-select: none;
+    /* Safari */
+    -moz-user-select: none;
+    /* Firefox */
+    -ms-user-select: none;
+    /* IE10+/Edge */
+    user-select: none;
+    /* Standard */
+
+
 }
 
 .timerText {
     /* font-size: 8vw; */
-    font-size: 5em;
+    font-size: 6em;
     display: inline-block;
     text-align: center;
     color: white;
@@ -61,6 +72,25 @@
     margin: 1px 2px;
 }
 
-.timerButton:hover {
+.timerButton:focus {
     background-color: darkred;
+}
+
+.timerForm {
+    display: flex;
+}
+
+.timerInput {
+    display: inline;
+    width: 2.3ch;
+    text-align: center;
+    background-color: red;
+    outline: blue 1px;
+    border: none;
+    color: white;
+}
+
+.timerInput:focus {
+    border: none;
+    outline: none;
 }
