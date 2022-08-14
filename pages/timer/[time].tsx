@@ -1,9 +1,8 @@
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import { useEffect } from 'react';
-import { formatDuration } from 'date-fns/fp';
 import { useAudio } from '../../libraries/hooks';
-import { seconds } from '../../libraries/utils/date-utils';
 import { Timer } from '../../components/timer';
+import ms from 'ms';
 
 export const getStaticPaths: GetStaticPaths = async () => {
 
@@ -15,25 +14,12 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps = async (context) => {
     const rawDuration = context.params.time.split("-");
-    const timerDuration: Duration = { hours: 0, minutes: 0, seconds: 0 };
+    // const timerDuration: Duration = { hours: 0, minutes: 0, seconds: 0 };
+    let timerDuration: number = 0;
 
-    for (let i = 0; i < rawDuration.length; i++) {
-        switch (rawDuration[i + 1]) {
-            case ("hours"):
-            case ("hour"):
-                timerDuration.hours = parseInt(rawDuration[i]);
-                break;
-
-            case ("minutes"):
-            case ("minute"):
-                timerDuration.minutes = parseInt(rawDuration[i]);
-                break;
-
-            case ("seconds"):
-            case ("second"):
-                timerDuration.seconds = parseInt(rawDuration[i]);
-                break;
-        }
+    for (let i = 0; i < rawDuration.length; i+= 2) {
+        console.log(`${rawDuration[i]} ${rawDuration[i + 1]}`);
+        timerDuration += ms(`${rawDuration[i]} ${rawDuration[i + 1]}`);
     }
 
     return {

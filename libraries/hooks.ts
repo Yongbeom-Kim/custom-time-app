@@ -1,7 +1,4 @@
 import { Dispatch, MutableRefObject, SetStateAction, useEffect, useRef, useState } from "react";
-import { formatDuration } from 'date-fns/fp';
-import { milliseconds } from 'date-fns';
-import { seconds, subDuration } from './utils/date-utils';
 
 export function useAudio(audio_url: string): [HTMLAudioElement, () => void, () => void] {
     // @ts-ignore we assign proper variable to this on initialization
